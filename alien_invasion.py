@@ -135,6 +135,10 @@ class AlienInvasion:
         self._check_fleet_edges()
         self.aliens.update()
 
+        # check collisions between ship and aliens
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            print('ship hit!')
+
     def _update_screen(self):
         """update the image og screen and show it."""
         self.screen.fill(self.settings.bg_color)
