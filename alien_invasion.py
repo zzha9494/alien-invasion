@@ -146,22 +146,37 @@ class AlienInvasion:
         if pygame.sprite.spritecollideany(self.ship, self.aliens):
             self._ship_hit()
 
+        # check if aliens reach bottom
+        self._check_aliens_bottom()
+
+    def _check_aliens_bottom(self):
+        """check if aliens reach bottom"""
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+                # handle as ship hit
+                self._ship_hit()
+                break
+
     def _ship_hit(self):
         """response the hit."""
 
-        # ships_left subtract 1
-        self.stats.ships_left -= 1
+        if self.stats.ships_left > 0:
+            # ships_left subtract 1
+            self.stats.ships_left -= 1
 
-        # clear aliens and bullets
-        self.aliens.empty()
-        self.bullets.empty()
+            # clear aliens and bullets
+            self.aliens.empty()
+            self.bullets.empty()
 
-        # create a new group of aliens and center the ship
-        self._create_fleet()
-        self.ship.center_ship()
+            # create a new group of aliens and center the ship
+            self._create_fleet()
+            self.ship.center_ship()
 
-        # pause
-        sleep(0.5)
+            # pause
+            sleep(0.5)
+        else:
+            self.stats.game_active = False
 
     def _update_screen(self):
         """update the image og screen and show it."""
