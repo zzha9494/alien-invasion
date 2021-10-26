@@ -5,6 +5,7 @@ import pygame
 
 from settings import Settings
 from game_stats import GameStats
+from button import Button
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -30,6 +31,9 @@ class AlienInvasion:
         self.aliens = pygame.sprite.Group()
 
         self._create_fleet()
+
+        # create "play" button
+        self.play_button = Button(self, 'Play')
 
     def run_game(self):
         """start the main loop."""
@@ -140,6 +144,7 @@ class AlienInvasion:
             alien.rect.y += self.settings.alien_drop_speed
         self.settings.fleet_direction *= -1
 
+    # noinspection PyTypeChecker
     def _update_aliens(self):
         """check if any alien is on edge; update the position of aliens in group"""
         self._check_fleet_edges()
@@ -189,6 +194,10 @@ class AlienInvasion:
             bullet.draw_bullet()
 
         self.aliens.draw(self.screen)
+
+        # if game is not active, show play button
+        if not self.stats.game_active:
+            self.play_button.draw_button()
 
         pygame.display.flip()
 
