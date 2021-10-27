@@ -66,6 +66,9 @@ class AlienInvasion:
             self._start_game()
 
     def _start_game(self):
+        # reset game settings
+        self.settings.initialize_dynamic_settings()
+
         # reset game stats
         self.stats.reset_stats()
         self.stats.game_active = True
@@ -104,7 +107,7 @@ class AlienInvasion:
 
     def _fire_bullet(self):
         """create a bullet and put it into group bullets."""
-        if len(self.bullets) < self.settings.bullet_allowed:
+        if len(self.bullets) < self.settings.bullet_allowed and self.stats.game_active:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
@@ -129,6 +132,7 @@ class AlienInvasion:
             # delete current bullets and create a group of aliens
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _create_fleet(self):
         """create a group of aliens"""

@@ -16,6 +16,7 @@ class Settings:
 
         # 设置目标
         self.target_width, self.target_height = 15, 100
+        self.target_speed = 1
         self.target_color = (0, 0, 0)
 
         # 设置子弹
@@ -26,6 +27,9 @@ class Settings:
 
         # 设置生命值
         self.chances_left = 3
+
+        # 设置难度增加率
+        self.speedup_scale = 1.1
 
         self.game_active = False
 
@@ -67,11 +71,13 @@ class Target:
         self.rect.midright = self.screen_rect.midright
 
         self.moving_direction = 1
+        self.y = float(self.rect.y)
 
     def update(self):
         if self.rect.top <= 0 or self.rect.bottom >= self.screen_rect.bottom:
             self.moving_direction *= -1
-        self.rect.y += 1 * self.moving_direction
+        self.y += self.settings.target_speed * self.moving_direction
+        self.rect.y = self.y
 
     def draw_target(self):
         pygame.draw.rect(self.screen, self.color, self.rect)
@@ -96,6 +102,9 @@ class Button:
     def draw_button(self):
         self.screen.fill(self.color, self.rect)
         self.screen.blit(self.msg_image, self.msg_image_rect)
+
+    def center_text(self):
+        self.msg_image_rect.center = self.rect.center
 
 
 class Bullet(Sprite):
@@ -125,6 +134,19 @@ class Game:
         self.screen_rect = self.screen.get_rect()
 
         self.play_button = Button(self, 'PLAY')
+        # 难度按钮
+        self.level_2_button = Button(self, 'Lv 2')
+        self.level_2_button.rect.midtop = self.screen_rect.midtop
+        self.level_2_button.center_text()
+
+        self.level_1_button = Button(self, 'Lv 1')
+        self.level_1_button.rect.midright = self.level_2_button.rect.midleft
+        self.level_1_button.center_text()
+
+        self.level_3_button = Button(self, 'Lv 3')
+        self.level_3_button.rect.midleft = self.level_2_button.rect.midright
+        self.level_3_button.center_text()
+
         self.ship = Ship(self)
         self.target = Target(self)
         self.bullets = Group()
@@ -140,11 +162,24 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.play_button.rect.collidepoint(mouse_pos) and not self.settings.game_active:
-                    self.ship.rect.midleft = self.screen_rect.midleft
-                    self.target.rect.midright = self.screen_rect.midright
-                    self.bullets.empty()
-                    self.settings.chances_left = 3
-                    self.settings.game_active = True
+                    self._start_new_game()
+                elif self.level_1_button.rect.collidepoint(mouse_pos) and not self.settings.game_active:
+                    self._start_new_game()
+                    self.settings.target_speed = 1.3
+                elif self.level_2_button.rect.collidepoint(mouse_pos) and not self.settings.game_active:
+                    self._start_new_game()
+                    self.settings.target_speed = 1.5
+                elif self.level_3_button.rect.collidepoint(mouse_pos) and not self.settings.game_active:
+                    self._start_new_game()
+                    self.settings.target_speed = 1.7
+
+    def _start_new_game(self):
+        self.ship.rect.midleft = self.screen_rect.midleft
+        self.target.rect.midright = self.screen_rect.midright
+        self.bullets.empty()
+        self.settings.chances_left = 3
+        self.settings.target_speed = 1
+        self.settings.game_active = True
 
     def _check_keydown_events(self, event):
         if event.key == pygame.K_UP:
@@ -173,9 +208,10 @@ class Game:
                 self.settings.chances_left -= 1
 
     def _hit_target(self):
-        pygame.sprite.spritecollide(self.target, self.bullets, True)
+        if pygame.sprite.spritecollide(self.target, self.bullets, True):
+            self.settings.target_speed *= self.settings.speedup_scale
         if self.settings.chances_left <= 0:
-                    self.settings.game_active = False
+            self.settings.game_active = False
 
     def _update_screen(self):
         self.screen.fill(self.settings.screen_color)
@@ -185,6 +221,9 @@ class Game:
             bullet.draw_bullet()
         if not self.settings.game_active:
             self.play_button.draw_button()
+            self.level_1_button.draw_button()
+            self.level_2_button.draw_button()
+            self.level_3_button.draw_button()
 
         # 刷新屏幕
         pygame.display.flip()
@@ -203,7 +242,7 @@ class Game:
             self._update_screen()
 
             # 调试输出
-            # print(len(self.bullets))
+            # print(self.settings.target_speed)
 
 
 shooting_game = Game()
