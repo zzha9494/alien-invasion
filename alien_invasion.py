@@ -76,6 +76,7 @@ class AlienInvasion:
         self.stats.game_active = True
         self.sb.prep_score()
         self.sb.prep_level()
+        self.sb.prep_ships()
 
         # clear aliens and bullets left
         self.aliens.empty()
@@ -88,6 +89,7 @@ class AlienInvasion:
         # hide mouse
         pygame.mouse.set_visible(False)
 
+    # noinspection SpellCheckingInspection
     def _check_keydown_events(self, event):
         """response keydown events"""
         if event.key == pygame.K_RIGHT:
@@ -102,6 +104,7 @@ class AlienInvasion:
         elif event.key == pygame.K_p and not self.stats.game_active:
             self._start_game()
 
+    # noinspection SpellCheckingInspection
     def _check_keyup_events(self, event):
         """response keyup events"""
         if event.key == pygame.K_RIGHT:
@@ -216,6 +219,7 @@ class AlienInvasion:
         if self.stats.ships_left > 0:
             # ships_left subtract 1
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             # clear aliens and bullets
             self.aliens.empty()
